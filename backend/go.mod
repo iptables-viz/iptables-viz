@@ -3,6 +3,7 @@ module kubeProxy
 go 1.19
 
 require (
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	k8s.io/apimachinery v0.26.3
 	k8s.io/client-go v0.26.3
@@ -11,6 +12,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -111,8 +112,11 @@ func main() {
 	r.HandleFunc("/iptables/kubernetes", GetKubernetesDefault).Methods("GET")
 	r.HandleFunc("/iptables/kubernetes/{pod}/{table}", GetKubernetesPodIptablesOutput).Methods("GET")
 	r.NotFoundHandler = http.HandlerFunc(defaultHandler)
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
-	err = http.ListenAndServe(fmt.Sprintf(":%d", convertedPort), r)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", convertedPort), handlers.CORS(originsOk, headersOk, methodsOk)(r))
 	if err != nil {
 		fmt.Println("error in starting the server: ", err)
 		return
