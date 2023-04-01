@@ -1,43 +1,15 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os/exec"
 	"time"
 
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/gorilla/mux"
 )
 
-type Response struct {
-	Entity        string      `json:"entity"`
-	IptableOutput interface{} `json:"iptableOutput"`
-}
-
-type KubernetesDefaultResponse struct {
-    PodName       string      `json:"podName"`
-    IptableOutput interface{} `json:"iptableOutput"`
-}
-
-type KubeProxy struct {
-	PodNames   []string       `json:"podNames"`
-}
-
-func clientSetup() *kubernetes.Clientset {
-	rules := clientcmd.NewDefaultClientConfigLoadingRules()
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
-	config, err := kubeconfig.ClientConfig()
-	if err != nil {
-		fmt.Printf("Error in new client config: %s\n", err)
-	}
-	clientset := kubernetes.NewForConfigOrDie(config)
-	return clientset
-}
 
 func GetDockerIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -63,22 +35,25 @@ func GetDockerIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-
 func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	kubeProxyPodName := vars["pod"]
 	tableName := vars["table"]
 	var resp Response
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("kubectl exec -n kube-system %s -- sh -c \"iptables -L -t %s\" | jc --iptables", kubeProxyPodName, tableName))
-	output, err := cmd.Output()
+	output, err := RunPodShellCommand(kubeProxyPodName, tableName)
 	if err != nil {
-		fmt.Printf("error in listing Iptables chains: %v\n", err)
-		return
+		fmt.Println("error in running the shell command: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+	// cmd := exec.Command("bash", "-c", fmt.Sprintf("kubectl exec -n kube-system %s -- sh -c \"iptables -L -t %s\" | jc --iptables", kubeProxyPodName, tableName))
+	// output, err := cmd.Output()
+	// if err != nil {
+	// 	fmt.Printf("error in listing Iptables chains: %v\n", err)
+	// 	return
+	// }
 
 	resp.Entity = "kubernetes"
-	resp.IptableOutput = string(output)
+	resp.IptableOutput = output
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
@@ -90,26 +65,29 @@ func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 
 func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
     var resp KubernetesDefaultResponse
-    clientset := clientSetup()
-    pods, err := clientset.CoreV1().Pods("kube-system").List(context.Background(), metav1.ListOptions{LabelSelector: "k8s-app=kube-proxy"})
+    clientSet := ClientSetup()
+    podList, err := GetPodList(clientSet)
 	if err != nil {
-        fmt.Printf("Error getting kube-proxy pod: %v\n", err)
-	 	return
-	}
-	if len(pods.Items) == 0 {
-	 	fmt.Println("kube-proxy replica not found.")
-	 	return
-	}
-	kubeProxyPodName := pods.Items[0].Name
-    tableName := "nat"
-    cmd := exec.Command("bash", "-c", fmt.Sprintf("kubectl exec -n kube-system %s -- sh -c \"iptables -L -t %s\" | jc --iptables", kubeProxyPodName, tableName))
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Printf("error in listing Iptables chains: %v\n", err)
+		fmt.Println("error in getting pod list: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	// kubeProxyPodName := pods.Items[0].Name
+	kubeProxyPodName := podList[0]
+    tableName := "nat"
+	output, err := RunPodShellCommand(kubeProxyPodName, tableName)
+	if err != nil {
+		fmt.Println("error in running the shell command: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+    // cmd := exec.Command("bash", "-c", fmt.Sprintf("kubectl exec -n kube-system %s -- sh -c \"iptables -L -t %s\" | jc --iptables", kubeProxyPodName, tableName))
+	// output, err := cmd.Output()
+	// if err != nil {
+	// 	fmt.Printf("error in listing Iptables chains: %v\n", err)
+	// 	return
+	// }
     resp.PodName = kubeProxyPodName
-    resp.IptableOutput = string(output)
+    resp.IptableOutput = output
     w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(&resp)
 	if err != nil {
@@ -121,19 +99,25 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 
 func GetAllKubeProxyPods(w http.ResponseWriter, r *http.Request) {
 	var resp KubeProxy
-	var podList []string
-	clientset := clientSetup()
-    pods, err := clientset.CoreV1().Pods("kube-system").List(context.Background(), metav1.ListOptions{LabelSelector: "k8s-app=kube-proxy"})
+	// var podList []string
+	clientSet := ClientSetup()
+    // pods, err := clientset.CoreV1().Pods("kube-system").List(context.Background(), metav1.ListOptions{LabelSelector: "k8s-app=kube-proxy"})
+	// if err != nil {
+    //     fmt.Printf("Error getting kube-proxy pod: %v\n", err)
+	//  	return
+	// }
+	// if len(pods.Items) == 0 {
+	//  	fmt.Println("kube-proxy replica not found.")
+	//  	return
+	// }
+	// for _, p := range pods.Items {
+	// 	podList = append(podList, p.Name)
+	// }
+	podList, err := GetPodList(clientSet)
 	if err != nil {
-        fmt.Printf("Error getting kube-proxy pod: %v\n", err)
-	 	return
-	}
-	if len(pods.Items) == 0 {
-	 	fmt.Println("kube-proxy replica not found.")
-	 	return
-	}
-	for _, p := range pods.Items {
-		podList = append(podList, p.Name)
+		fmt.Println("error in getting pod list: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	resp.PodNames = podList
 	w.Header().Set("Content-Type", "application/json")
