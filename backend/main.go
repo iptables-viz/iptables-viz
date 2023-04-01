@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	"backend/models"
+	"backend/utility"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -17,7 +19,7 @@ func GetDockerIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	containerName := vars["container"]
 	tableName := vars["table"]
-	var resp Response
+	var resp models.Response
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("docker exec %s iptables -L -t %s | jc --iptables", containerName, tableName))
 	output, err := cmd.Output()
 
@@ -41,8 +43,8 @@ func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	kubeProxyPodName := vars["pod"]
 	tableName := vars["table"]
-	var resp Response
-	output, err := RunPodShellCommand(kubeProxyPodName, tableName)
+	var resp models.Response
+	output, err := utility.RunPodShellCommand(kubeProxyPodName, tableName)
 	if err != nil {
 		fmt.Println("error in running the shell command: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -59,9 +61,9 @@ func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
-	var resp KubernetesDefaultResponse
-	clientSet := ClientSetup()
-	podList, err := GetPodList(clientSet)
+	var resp models.KubernetesDefaultResponse
+	clientSet := utility.ClientSetup()
+	podList, err := utility.GetPodList(clientSet)
 	if err != nil {
 		fmt.Println("error in getting pod list: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -69,7 +71,7 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	}
 	kubeProxyPodName := podList[0]
 	tableName := "nat"
-	output, err := RunPodShellCommand(kubeProxyPodName, tableName)
+	output, err := utility.RunPodShellCommand(kubeProxyPodName, tableName)
 	if err != nil {
 		fmt.Println("error in running the shell command: ", err)
 		w.WriteHeader(http.StatusInternalServerError)

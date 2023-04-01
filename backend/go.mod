@@ -1,4 +1,4 @@
-module kubeProxy
+module backend
 
 go 1.19
 

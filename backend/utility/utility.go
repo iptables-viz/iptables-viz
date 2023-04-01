@@ -1,11 +1,9 @@
-package main
+package utility
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os/exec"
-	"text/template"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -50,26 +48,4 @@ func GetPodList(clientSet *kubernetes.Clientset) ([]string, error) {
 		podList = append(podList, p.Name)
 	}
 	return podList, nil
-}
-
-func htmlTemplate(pd PageData) (string, error) {
-	html := `<HTML>
-	<head><title>{{.Title}}</title></head>
-	<body>
-	{{.Body}}
-	</body>
-	</HTML>`
-
-	// Parse the template
-	tmpl, err := template.New("index").Parse(html)
-	if err != nil {
-		return "", err
-	}
-	var out bytes.Buffer
-
-	if err := tmpl.Execute(&out, pd); err != nil {
-		return "", err
-	}
-
-	return out.String(), nil
 }

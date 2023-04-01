@@ -1,4 +1,4 @@
-package main
+package models
 
 type Response struct {
 	Entity        string      `json:"entity"`
@@ -9,9 +9,4 @@ type KubernetesDefaultResponse struct {
     PodName       string      `json:"podName"`
 	PodList		  []string       `json:"podNames"`
     IptableOutput interface{} `json:"iptableOutput"`
-}
-
-type PageData struct {
-	Title string
-	Body  string
 }
