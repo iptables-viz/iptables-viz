@@ -91,7 +91,7 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func healthCheck(w http.ResponseWriter, r *http.Request) {
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	health := make(map[string]string)
 	health["now"] = now.Format(time.ANSIC)
@@ -99,7 +99,7 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(health)
 }
 
-func defaultHandler(w http.ResponseWriter, r *http.Request) {
+func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprint(w, "Invalid Access: requested route not found")
 }
