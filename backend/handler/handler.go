@@ -76,7 +76,7 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error in running the shell command: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, fmt.Sprintf("Shell command error: %v", err))
+		fmt.Fprint(w, fmt.Sprintf("Shell command error: %v", err))
 	}
 	resp.CurrentPodName = kubeProxyPodName
 	resp.IptableOutput = output
@@ -86,7 +86,7 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error in encoding output: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, fmt.Sprintf("JSON Encode Error: %v", err))
+		fmt.Fprint(w, fmt.Sprintf("JSON Encode Error: %v", err))
 		return
 	}
 }
