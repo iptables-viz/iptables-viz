@@ -1,4 +1,4 @@
-module backend
+module "github.com/iptables-viz/iptables-viz/backend"
 
 go 1.19
 

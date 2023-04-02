@@ -6,7 +6,7 @@ type Response struct {
 }
 
 type KubernetesDefaultResponse struct {
-	PodName       string      `json:"podName"`
-	PodList       []string    `json:"podNames"`
-	IptableOutput interface{} `json:"iptableOutput"`
+	CurrentPodName string      `json:"currentPodName"`
+	PodList        []string    `json:"podNames"`
+	IptableOutput  interface{} `json:"iptableOutput"`
 }
