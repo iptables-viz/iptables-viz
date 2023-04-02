@@ -10,3 +10,8 @@ type KubernetesDefaultResponse struct {
 	PodList        []string    `json:"podNames"`
 	IptableOutput  interface{} `json:"iptablesOutput"`
 }
+
+type LinuxIptableOutput struct {
+	TableName     string      `json:"tableName"`
+	IptableOutput interface{} `json:"iptablesOutput"`
+}

@@ -103,3 +103,27 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprint(w, "Invalid Access: requested route not found")
 }
+
+func GetLinuxIptableOutput(w http.ResponseWriter, r *http.Request) {
+	var resp models.LinuxIptableOutput
+	vars := mux.Vars(r)
+	tableName := vars["table"]
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("iptables -L -t %s | jc --iptables", tableName))
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Println("error in running the shell command: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, fmt.Sprintf("Shell command error: %v", err))
+		return
+	}
+	resp.IptableOutput = string(output)
+	resp.TableName = tableName
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(&resp)
+	if err != nil {
+		fmt.Println("error in encoding output: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, fmt.Sprintf("JSON Encode Error: %v", err))
+		return
+	}
+}

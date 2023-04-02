@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -35,7 +36,7 @@ func RunPodShellCommand(podName, tableName string) (string, error) {
 
 func GetPodList(clientSet *kubernetes.Clientset) ([]string, error) {
 	var podList []string
-	pods, err := clientSet.CoreV1().Pods("kube-system").List(context.Background(), metav1.ListOptions{LabelSelector: "k8s-app=kube-proxy"})
+	pods, err := clientSet.CoreV1().Pods("kube-system").List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		fmt.Printf("Error getting kube-proxy pod: %v\n", err)
 		return nil, err
@@ -45,7 +46,9 @@ func GetPodList(clientSet *kubernetes.Clientset) ([]string, error) {
 		return nil, fmt.Errorf("kube-proxy replicas not found")
 	}
 	for _, p := range pods.Items {
-		podList = append(podList, p.Name)
+		if strings.Contains(p.Name, "kube-proxy") {
+			podList = append(podList, p.Name)
+		}
 	}
 	return podList, nil
 }
