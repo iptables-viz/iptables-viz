@@ -14,8 +14,8 @@ import (
 
 
 func main() {
-	port := flag.String("n", "default", "kubernetes namespace")
-	platform := flag.String("d", "", "kubernetes deployment name")
+	port := flag.String("port", "8080", "port number")
+	platform := flag.String("platform", "", "platform for iptables visualization")
 	flag.Parse()
 	convertedPort, err := strconv.ParseInt(*port, 10, 64)
 	if err != nil {
