@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/iptables-viz/iptables-viz/backend/handler"
@@ -14,15 +14,16 @@ import (
 
 
 func main() {
-	port := os.Args[1]
-	platform := os.Args[2]
-	convertedPort, err := strconv.ParseInt(port, 10, 64)
+	port := flag.String("n", "default", "kubernetes namespace")
+	platform := flag.String("d", "", "kubernetes deployment name")
+	flag.Parse()
+	convertedPort, err := strconv.ParseInt(*port, 10, 64)
 	if err != nil {
 		fmt.Println("error in parsing port number: ", err)
 		return
 	}
 	r := mux.NewRouter()
-	if platform == "kubernetes" {
+	if *platform == "kubernetes" {
 		r.HandleFunc("/iptables/health", handler.HealthCheck)
 		r.HandleFunc("/iptables/kubernetes", handler.GetKubernetesDefault).Methods("GET")
 		r.HandleFunc("/iptables/kubernetes/{pod}/{table}", handler.GetKubernetesPodIptablesOutput).Methods("GET")
