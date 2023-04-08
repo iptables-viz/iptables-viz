@@ -6,12 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iptables-viz/iptables-viz/backend/handler"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/iptables-viz/iptables-viz/backend/handler"
 )
-
-
 
 func main() {
 	port := flag.String("port", "8080", "port number")
