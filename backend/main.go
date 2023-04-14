@@ -26,6 +26,7 @@ func main() {
 		r.HandleFunc("/iptables/kubernetes", handler.GetKubernetesDefault).Methods("GET")
 		r.HandleFunc("/iptables/kubernetes/{pod}/{table}", handler.GetKubernetesPodIptablesOutput).Methods("GET")
 	} else {
+		r.HandleFunc("/iptables/health", handler.HealthCheck)
 		r.HandleFunc("/iptables/linux/{table}", handler.GetLinuxIptableOutput).Methods("GET")
 	}
 	r.NotFoundHandler = http.HandlerFunc(handler.DefaultHandler)
