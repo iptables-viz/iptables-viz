@@ -5,37 +5,15 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"strings"
 	"time"
+
+	"log"
 
 	"github.com/gorilla/mux"
 	"github.com/iptables-viz/iptables-viz/backend/models"
 	"github.com/iptables-viz/iptables-viz/backend/utility"
 )
-
-func GetDockerIptablesOutput(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	containerName := vars["container"]
-	tableName := vars["table"]
-	var resp models.Response
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("docker exec %s iptables -L -t %s | jc --iptables", containerName, tableName))
-	output, err := cmd.Output()
-
-	if err != nil {
-		fmt.Printf("error in listing Iptables chains: %v\n", err)
-		return
-	}
-
-	resp.Entity = "docker"
-	resp.IptableOutput = string(output)
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(&resp)
-	if err != nil {
-		fmt.Println("error in encoding output: ", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "JSON Encode Error: %v", err)
-		return
-	}
-}
 
 func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -44,16 +22,15 @@ func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	var resp models.Response
 	output, err := utility.RunPodShellCommand(kubeProxyPodName, tableName)
 	if err != nil {
-		fmt.Println("error in running the shell command: ", err)
+		log.Printf("Failed to run the shell command, %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Shell command error: %v", err)
 	}
 	resp.Entity = "kubernetes"
 	resp.IptableOutput = output
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(&resp)
-	if err != nil {
-		fmt.Println("error in encoding output: ", err)
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("Failed to JSON encode the response, %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "JSON Encode Error: %v", err)
 		return
@@ -65,26 +42,32 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	clientSet := utility.ClientSetup()
 	podList, err := utility.GetPodList(clientSet)
 	if err != nil {
-		fmt.Println("error in getting pod list: ", err)
+		log.Printf("Error in getting pod list, %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Pod List error: %v", err)
+		return
+	}
+	if len(podList) == 0 {
+		log.Printf("No kube-proxy pods found")
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "No kube-proxy pods found")
 		return
 	}
 	kubeProxyPodName := podList[0]
 	tableName := "nat"
 	output, err := utility.RunPodShellCommand(kubeProxyPodName, tableName)
 	if err != nil {
-		fmt.Println("error in running the shell command: ", err)
+		log.Printf("Error in running the shell command, %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Shell command error: %v", err)
+		return
 	}
 	resp.CurrentPodName = kubeProxyPodName
 	resp.IptableOutput = output
 	resp.PodList = podList
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(&resp)
-	if err != nil {
-		fmt.Println("error in encoding output: ", err)
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("Failed to JSON encode the response, %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "JSON Encode Error: %v", err)
 		return
@@ -96,7 +79,12 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	health := make(map[string]string)
 	health["now"] = now.Format(time.ANSIC)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(health)
+	if err := json.NewEncoder(w).Encode(health); err != nil {
+		log.Printf("Failed to JSON encode the response, %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "JSON Encode Error: %v", err)
+		return
+	}
 }
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,20 +96,25 @@ func GetLinuxIptableOutput(w http.ResponseWriter, r *http.Request) {
 	var resp models.LinuxIptableOutput
 	vars := mux.Vars(r)
 	tableName := vars["table"]
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("iptables -L -t %s | jc --iptables", tableName))
-	output, err := cmd.Output()
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("iptables -w -L -t %s | jc --iptables --quiet", tableName))
+	out, err := cmd.CombinedOutput()
+	output := strings.TrimSpace(string(out))
 	if err != nil {
-		fmt.Println("error in running the shell command: ", err)
+		if output != "" {
+			log.Printf("Error in running the shell command, %s, %s", err.Error(), output)
+			fmt.Fprintf(w, "Shell command error, %s, %s", err.Error(), output)
+		} else {
+			log.Printf("Error in running the shell command, %s", err.Error())
+			fmt.Fprintf(w, "Shell command error, %s", err.Error())
+		}
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Shell command error: %v", err)
 		return
 	}
 	resp.IptableOutput = string(output)
 	resp.TableName = tableName
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(&resp)
-	if err != nil {
-		fmt.Println("error in encoding output: ", err)
+	if err := json.NewEncoder(w).Encode(&resp); err != nil {
+		log.Printf("Failed to JSON encode the response, %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "JSON Encode Error: %v", err)
 		return

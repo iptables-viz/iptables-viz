@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -12,14 +12,9 @@ import (
 )
 
 func main() {
-	port := flag.String("port", "8080", "port number")
+	port := flag.Uint("port", 8080, "port number")
 	platform := flag.String("platform", "linux", "platform for iptables visualization")
 	flag.Parse()
-	convertedPort, err := strconv.ParseInt(*port, 10, 64)
-	if err != nil {
-		fmt.Println("error in parsing port number: ", err)
-		return
-	}
 	r := mux.NewRouter()
 	if *platform == "kubernetes" {
 		r.HandleFunc("/iptables/health", handler.HealthCheck)
@@ -34,9 +29,7 @@ func main() {
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
-	err = http.ListenAndServe(fmt.Sprintf(":%d", convertedPort), handlers.CORS(originsOk, headersOk, methodsOk)(r))
-	if err != nil {
-		fmt.Println("error in starting the server: ", err)
-		return
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), handlers.CORS(originsOk, headersOk, methodsOk)(r)); err != nil {
+		log.Fatalf("Error in starting the server, %s", err.Error())
 	}
 }

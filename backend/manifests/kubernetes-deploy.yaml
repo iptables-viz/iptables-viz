@@ -1,0 +1,85 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iptables-viz
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: iptables-viz-backend-sa
+  namespace: iptables-viz
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: iptables-viz-backend-role
+  namespace: kube-system
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: iptables-viz-backend-binding
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: iptables-viz-backend-role
+subjects:
+  - kind: ServiceAccount
+    name: iptables-viz-backend-sa
+    namespace: iptables-viz
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iptables-viz-backend
+  namespace: iptables-viz
+  labels:
+    app: iptables-viz-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iptables-viz-backend
+  template:
+    metadata:
+      labels:
+        app: iptables-viz-backend
+    spec:
+      containers:
+        - name: iptables-viz-backend
+          image: iptablesviz/iptables-viz-backend:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "125m"
+              ephemeral-storage: "500Mi"
+            limits:
+              memory: "500Mi"
+              cpu: "225m"
+              ephemeral-storage: "1Gi"
+      serviceAccountName: iptables-viz-backend-sa
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iptables-viz-backend-svc
+  namespace: iptables-viz
+spec:
+  selector:
+    app: iptables-viz-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
