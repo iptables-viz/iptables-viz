@@ -9,6 +9,15 @@
 : ${FRONTEND_SERVICE_NAME:="iptables-viz-frontend"}
 : ${SERVICE_DIR:="/etc/systemd/system"}
 
+# runs the given command as root (detects if we are root already)
+run_as_root() {
+    if [ $EUID -ne 0 ] && [ "$USE_SUDO" == "true" ]; then
+        sudo "${@}"
+    else
+        "${@}"
+    fi
+}
+
 # checks if the main systemd service is running or not
 check_if_main_systemd_is_running() {
   if [[ "$(systemctl is-active iptables-viz)" = "active" ]]; then
@@ -92,31 +101,31 @@ is_backend_exists() {
 
 
 if check_if_main_systemd_is_running; then 
-  systemctl stop iptables-viz.service
+  run_as_root systemctl stop iptables-viz.service
 fi
 if check_if_main_systemd_is_enabled; then
-  systemctl disable iptables-viz
+  run_as_root systemctl disable iptables-viz
 fi
 if check_if_backend_systemd_is_enabled; then
-  systemctl disable iptables-viz-backend
+  run_as_root systemctl disable iptables-viz-backend
 fi
 if check_if_frontend_systemd_is_enabled; then 
-  systemctl disable iptables-viz-frontend
+  run_as_root systemctl disable iptables-viz-frontend
 fi
 if check_if_frontend_install_dir_exists; then
-  rm -rf /etc/iptables-viz
+  run_as_root rm -rf /etc/iptables-viz
   echo "Removed iptables frontend binary"
 fi
 if is_backend_unit_file_exists; then
-  rm /etc/systemd/system/iptables-viz-backend.service
+  run_as_root rm /etc/systemd/system/iptables-viz-backend.service
 fi
 if is_frontend_unit_file_exists; then
-    rm /etc/systemd/system/iptables-viz-frontend.service
+  run_as_root rm /etc/systemd/system/iptables-viz-frontend.service
 fi
 if is_main_unit_file_exists; then
-  rm /etc/systemd/system/iptables-viz.service
+  run_as_root rm /etc/systemd/system/iptables-viz.service
 fi
 if is_backend_exists; then
-  rm /usr/local/bin/iptables-viz-backend
+  run_as_root rm /usr/local/bin/iptables-viz-backend
   echo "Removed iptables backend binary"
 fi
