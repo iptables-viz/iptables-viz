@@ -9,12 +9,17 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/iptables-viz/iptables-viz/backend/handler"
+	"github.com/iptables-viz/iptables-viz/backend/utility"
 )
 
 func main() {
 	port := flag.Uint("port", 8080, "port number")
 	platform := flag.String("platform", "linux", "platform for iptables visualization")
+	kubeconfig := flag.String("kubeconfig", "", "kubeconfig file path")
 	flag.Parse()
+
+	utility.KubeConfigFilePath = *kubeconfig
+
 	r := mux.NewRouter()
 	if *platform == "kubernetes" {
 		r.HandleFunc("/iptables/health", handler.HealthCheck)

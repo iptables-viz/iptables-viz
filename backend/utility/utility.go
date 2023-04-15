@@ -11,13 +11,37 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/klog"
 )
+
+var KubeConfigFilePath string
+
+func buildConfigFromFlags(masterURL, kubeConfigPath string) (*rest.Config, error) {
+	if kubeConfigPath == "" && masterURL == "" {
+		kubeconfig, err := rest.InClusterConfig()
+		if err == nil {
+			return kubeconfig, nil
+		}
+		klog.Warningf("Neither --kubeconfig nor --master was specified. Using the inClusterConfig. Error creating inClusterConfig: %v", err)
+	}
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeConfigPath},
+		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: masterURL}}).ClientConfig()
+}
+
+func getKubeConfig() (*rest.Config, error) {
+	// It uses in-cluster config, if kubeconfig path is not specified
+	config, err := buildConfigFromFlags("", KubeConfigFilePath)
+	return config, err
+}
 
 func ClientSetup() *kubernetes.Clientset {
 	// Create a Kubernetes REST config
-	config, err := rest.InClusterConfig()
+	config, err := getKubeConfig()
 	if err != nil {
-		log.Fatalf("Error while getting in-cluster config, %s", err.Error())
+		log.Fatalf("Error while getting config, %s", err.Error())
 	}
 
 	// Create a Kubernetes client from the REST config
