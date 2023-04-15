@@ -12,6 +12,8 @@
 HAS_CURL="$(type "curl" &> /dev/null && echo true || echo false)"
 HAS_WGET="$(type "wget" &> /dev/null && echo true || echo false)"
 HAS_SYSTEMD="$(type "systemctl" &> /dev/null && echo true || echo false)"
+HAS_JC="$(type "jc" &> /dev/null && echo true || echo false)"
+HAS_SERVE="$(type "serve" &> /dev/null && echo true || echo false)"
 
 # discovers the operating system for this system
 init_os() {
@@ -89,6 +91,16 @@ verify_supported() {
 
   if [ "${HAS_CURL}" != "true" ] && [ "${HAS_WGET}" != "true" ]; then
     echo "Either curl or wget is required"
+    exit 1
+  fi
+
+  if [ "${HAS_JC}" != "true" ]; then
+    echo "jc is required for installation"
+    exit 1
+  fi
+
+  if [ "${HAS_SERVE}" != "true" ]; then
+    echo "serve is required for installation"
     exit 1
   fi
 }
