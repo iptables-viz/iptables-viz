@@ -1,11 +1,9 @@
-name: Publish Docker image
+name: Publish Docker frontend image
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - backend/**
+    branches: ["main"]
+    paths: ["frontend/**"]
 
 jobs:
   build:
@@ -23,10 +21,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v4
         with:
-          context: ./backend
+          context: ./frontend
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/kubernetes-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/iptables-viz-frontend:latest

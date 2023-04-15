@@ -57,7 +57,7 @@ check_if_main_systemd_is_enabled() {
 
 # checks if the backend systemd service is enabled or not
 check_if_backend_systemd_is_enabled() {
-  if [["$(systemctl is-enabled ${BACKEND_SERVICE_NAME})" = "enabled" ]]; then
+  if [[ "$(systemctl is-enabled ${BACKEND_SERVICE_NAME})" = "enabled" ]]; then
     echo "$BACKEND_SERVICE_NAME is already enabled"
     return 0
   else
