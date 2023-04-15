@@ -60,15 +60,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          resources:
-            requests:
-              memory: "300Mi"
-              cpu: "125m"
-              ephemeral-storage: "500Mi"
-            limits:
-              memory: "500Mi"
-              cpu: "225m"
-              ephemeral-storage: "1Gi"
       serviceAccountName: iptables-viz-backend-sa
 ---
 apiVersion: v1
@@ -138,15 +129,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-          resources:
-            requests:
-              memory: "300Mi"
-              cpu: "125m"
-              ephemeral-storage: "500Mi"
-            limits:
-              memory: "500Mi"
-              cpu: "225m"
-              ephemeral-storage: "1Gi"
       serviceAccountName: iptables-viz-frontend-sa
 ---
 apiVersion: v1
