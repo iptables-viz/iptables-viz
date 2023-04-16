@@ -201,7 +201,7 @@ download_backend() {
     BACKEND_TMP_BIN="$BACKEND_TMP/$BACKEND_BINARY_NAME"
     echo "Preparing to install $BACKEND_BINARY_NAME into ${BACKEND_AGENT_INSTALL_DIR}"
     run_as_root cp "$BACKEND_TMP_BIN" "$BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
-    echo "$BBACKEND_BINARY_NAME installed into $BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
+    echo "$BACKEND_BINARY_NAME installed into $BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
 }
 
 # downloads the frontend binary and copies it to the frontend installation directory
@@ -225,7 +225,7 @@ download_frontend() {
     FRONTEND_TMP_BIN="$FRONTEND_TMP/$FRONTEND_BINARY_NAME"
     echo "Preparing to install $FRONTEND_BINARY_NAME into ${FRONTEND_AGENT_INSTALL_DIR}"
     run_as_root cp -r "$FRONTEND_TMP_BIN" "$FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
-    echo "$BFRONTEND_BINARY_NAME installed into $FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
+    echo "$FRONTEND_BINARY_NAME installed into $FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
 }
 
 # creates the main systemd file
