@@ -52,7 +52,7 @@ curl https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/scripts/in
 
 ### Kubernetes
 
-Upon the execution of the deployment manifest, check if all the pods in the namespace `iptables-viz` are in a `Running` state:
+Upon the execution of the deployment manifest, check if all the pods in the namespace `iptables-viz` are in a `Running` status:
 
 ```bash
 ❯ kubectl get pods -n iptables-viz
@@ -72,7 +72,7 @@ iptables-viz-backend-svc    ClusterIP   10.102.34.226   <none>        8080/TCP  
 iptables-viz-frontend-svc   NodePort    10.109.72.229   <none>        80:30025/TCP   22h
 ```
 
-To access the frontend web app in your browser, you can use the `iptables-viz-frontend-svc` services' NodePort at the following URL:
+To access the frontend web app in your browser, you can use the `iptables-viz-frontend-svc` services' NodePort (For example, `30025` in the above output) at the following URL:
 
 ```bash
 http://<node-external-ip>:<node-port>
@@ -83,6 +83,8 @@ http://<node-external-ip>:<node-port>
 Upon the execution of the installation script, check the status of the `iptables-viz` service:
 
 ```bash
+❯ systemctl status iptables-viz.service
+
 ● iptables-viz.service - Oneshot service for iptables-viz
      Loaded: loaded (/etc/systemd/system/iptables-viz.service; enabled; vendor preset: enabled)
      Active: active (exited) since Sun 2023-04-16 20:47:51 IST; 23s ago
