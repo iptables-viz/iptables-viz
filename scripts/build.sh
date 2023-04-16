@@ -22,7 +22,7 @@ do
     GOOS=${platform_split[0]}
     GOARCH=${platform_split[1]}
     echo 'Building' $GOARCH
-    OUTPUT_NAME='iptables-viz-backend-'$GOARCH
+    OUTPUT_NAME='iptables-viz-backend-'$GOARCH-$TAG
 
     env GOOS=$GOOS GOARCH=$GOARCH VERSION=$TAG go build -ldflags "-X main.Version=$TAG" -v -o platforms-$TAG/$OUTPUT_NAME $PACKAGE
 
