@@ -6,7 +6,7 @@ build:
 .PHONY: unused-package-check
 unused-package-check:
 	@echo "------------------"
-	@echo "--> Check unused packages for the litmusctl"
+	@echo "--> Check unused packages for iptables-viz-backend"
 	@echo "------------------"
 	@tidy=$$(go mod tidy); \
 	if [ -n "$${tidy}" ]; then \

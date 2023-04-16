@@ -1,52 +1,63 @@
 # iptables-viz
-A simple and scalable iptables visualisation tool which can integrate across Kubernetes and Linux.
 
-## **Platforms Support**
+A simple and scalable iptables visualization tool which can integrate across Kubernetes and Linux.
+
+## **Supported platforms**
+
 - Kubernetes
 - Linux
 
 ## **Pre-requisites**
-- `kubectl` (for Kubernetes platform)
-- `iptables` (for Linux platform)
-- `jc` (for Linux platform)
+
+### Kubernetes
+
+- `kubectl` (https://kubernetes.io/docs/reference/kubectl/)
+
+### Linux
+
+- `jc` (https://github.com/kellyjonbrazil/jc)
+- `serve` (https://www.npmjs.com/package/serve)
 
 ## **Installation**
 
-#### Kubernetes
+### Kubernetes
 
-The `kubernetes-deploy.yaml` creates the following:
-- namespace `iptables-viz`
-- role bindings for both backend and frontend for providing the namespace with appropriate functions to access the `kube-system` `kube-proxy` pods
-- backend service of type `ClusterIP` and a new frontend service of type `NodePort`
-- deployments for both backend and frontend
+The [kubernetes-deploy.yaml](manifests/kubernetes-deploy.yaml) manifest creates the following Kubernetes resources as part of the installation:
+
+- Namespace `iptables-viz`.
+- Deployments `iptables-viz-backend` and `iptables-viz-frontend` for backend and frontend respectively.
+- RBAC for both backend and frontend Deployments for providing appropriate permissions to access `kube-proxy` pods in the `kube-system` namespace and accessing the backend service respectively.
+- Services for both backend and frontend of type `ClusterIP` and `NodePort` respectively.
+
+Execute the following command to deploy the application:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/manifests/kubernetes-deploy.yaml
 ```
 
-#### Linux
+### Linux
 
-The `install.sh` creates the following:
-- downloads the respective binaries for both backend and frontend 
-- copies the binaries to their executable paths in the users' system
-- creates the systemd unit files for both frontend and backend
-- executes the unit files as linux service
+The [install.sh](scripts/install.sh) script performs the following steps as part of the installation:
 
+1. Downloads the appropriate backend server binary and the frontend web app.
+2. Copies the downloaded artifacts to their executable paths in the users' system.
+3. Creates Systemd unit files for both frontend and backend.
+4. Executes the unit files as Linux service.
 
 ```bash
-bash https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/scripts/install.sh
+curl https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/scripts/install.sh | sudo bash
 ```
 
 ## **Uninstallation**
 
-#### Kubernetes
+### Kubernetes
 
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/manifests/kubernetes-deploy.yaml
 ```
 
-#### Linux
+### Linux
 
 ```bash
-bash https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/scripts/uninstall.sh
-````
+curl https://raw.githubusercontent.com/iptables-viz/iptables-viz/main/scripts/uninstall.sh | sudo bash
+```
