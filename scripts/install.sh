@@ -8,6 +8,7 @@
 : "${FRONTEND_INSTALL_DIR:="/etc/iptables-viz"}"
 : "${FRONTEND_SERVICE_NAME:="iptables-viz-frontend"}"
 : "${SERVICE_DIR:="/etc/systemd/system"}"
+: "${TAG:="1.0.0"}"
 
 HAS_CURL="$(type "curl" &> /dev/null && echo true || echo false)"
 HAS_WGET="$(type "wget" &> /dev/null && echo true || echo false)"
@@ -102,10 +103,8 @@ run_as_root() {
 # downloads the backend binary and copies it to the backend installation directory
 download_backend() {
   echo "Downloading backend"
-  BACKEND_BINARY_NAME="iptables-viz-backend"
-  TAG="master"
   BACKEND_DIST="iptables-viz-backend-$ARCH-$TAG.tar.gz"
-  BIN_DOWNLOAD_URL="https://firebasestorage.googleapis.com/v0/b/neelanjan-manna.appspot.com/o/demo%2F$BACKEND_DIST?alt=media&token=b7563a58-2640-4206-bda5-dbcbee0e4af1"
+  BIN_DOWNLOAD_URL="https://github.com/iptables-viz/iptables-viz/releases/download/$TAG/$BACKEND_DIST"
   BACKEND_TMP_ROOT="$(mktemp -dt iptables-viz-backend-installer-XXXXXX)"
   BACKEND_TMP_FILE="$BACKEND_TMP_ROOT/$BACKEND_DIST"
   echo "Downloading $BIN_DOWNLOAD_URL"
@@ -125,28 +124,26 @@ download_backend() {
 
 # downloads the frontend binary and copies it to the frontend installation directory
 download_frontend() {
-    run_as_root mkdir "$FRONTEND_INSTALL_DIR"
-    echo "$FRONTEND_INSTALL_DIR directory created"
-    echo "Downloading frontend"
-    FRONTEND_BINARY_NAME="iptables-viz-frontend"
-    TAG="master"
-    FRONTEND_DIST="iptables-viz-frontend-$ARCH-$TAG.tar.gz"
-    BIN_DOWNLOAD_URL="https://firebasestorage.googleapis.com/v0/b/neelanjan-manna.appspot.com/o/demo%2F$FRONTEND_DIST?alt=media&token=85a3439f-1915-469a-80b0-2f6e3b600914"
-    FRONTEND_TMP_ROOT="$(mktemp -dt iptables-viz-frontend-installer-XXXXXX)"
-    FRONTEND_TMP_FILE="$FRONTEND_TMP_ROOT/$FRONTEND_DIST"
-    echo "Downloading $BIN_DOWNLOAD_URL"
-    if [ "${HAS_CURL}" == "true" ]; then
-        curl -SsL "$BIN_DOWNLOAD_URL" -o "$FRONTEND_TMP_FILE"
-    elif [ "${HAS_WGET}" == "true" ]; then
-        wget -q -O "$FRONTEND_TMP_FILE" "$BIN_DOWNLOAD_URL"
-    fi
-    FRONTEND_TMP="$FRONTEND_TMP_ROOT/$FRONTEND_BINARY_NAME"
-    mkdir -p "$FRONTEND_TMP"
-    tar xvf "$FRONTEND_TMP_FILE" -C "$FRONTEND_TMP"
-    FRONTEND_TMP_BIN="$FRONTEND_TMP/$FRONTEND_BINARY_NAME"
-    echo "Preparing to install $FRONTEND_BINARY_NAME into ${FRONTEND_AGENT_INSTALL_DIR}"
-    run_as_root cp -r "$FRONTEND_TMP_BIN" "$FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
-    echo "$FRONTEND_BINARY_NAME installed into $FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
+  run_as_root mkdir "$FRONTEND_INSTALL_DIR"
+  echo "$FRONTEND_INSTALL_DIR directory created"
+  echo "Downloading frontend"
+  FRONTEND_DIST="iptables-viz-frontend-$TAG.tar.gz"
+  BIN_DOWNLOAD_URL="https://github.com/iptables-viz/iptables-viz/releases/download/$TAG/$FRONTEND_DIST"
+  FRONTEND_TMP_ROOT="$(mktemp -dt iptables-viz-frontend-installer-XXXXXX)"
+  FRONTEND_TMP_FILE="$FRONTEND_TMP_ROOT/$FRONTEND_DIST"
+  echo "Downloading $BIN_DOWNLOAD_URL"
+  if [ "${HAS_CURL}" == "true" ]; then
+      curl -SsL "$BIN_DOWNLOAD_URL" -o "$FRONTEND_TMP_FILE"
+  elif [ "${HAS_WGET}" == "true" ]; then
+      wget -q -O "$FRONTEND_TMP_FILE" "$BIN_DOWNLOAD_URL"
+  fi
+  FRONTEND_TMP="$FRONTEND_TMP_ROOT/$FRONTEND_BINARY_NAME"
+  mkdir -p "$FRONTEND_TMP"
+  tar xvf "$FRONTEND_TMP_FILE" -C "$FRONTEND_TMP"
+  FRONTEND_TMP_BIN="$FRONTEND_TMP/$FRONTEND_BINARY_NAME"
+  echo "Preparing to install $FRONTEND_BINARY_NAME into ${FRONTEND_AGENT_INSTALL_DIR}"
+  run_as_root cp -r "$FRONTEND_TMP_BIN" "$FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
+  echo "$FRONTEND_BINARY_NAME installed into $FRONTEND_INSTALL_DIR/$FRONTEND_BINARY_NAME"
 }
 
 # creates the main systemd file

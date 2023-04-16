@@ -15,7 +15,7 @@ HAS_SYSTEMD="$(type "systemctl" &> /dev/null && echo true || echo false)"
 # binary builds, as well whether or not necessary tools are present
 verify_supported() {
   if [ "${HAS_SYSTEMD}" != "true" ]; then
-    echo "Systemd is required for installation"
+    echo "Systemd is required for uninstallation"
     exit 1
   fi
 }
