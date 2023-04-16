@@ -182,7 +182,7 @@ is_frontend_exists() {
 
 # downloads the backend binary and copies it to the backend installation directory
 download_backend() {
-    echo "downloading backend...."
+    echo "Downloading backend"
     BACKEND_BINARY_NAME="iptables-viz-backend"
     TAG="master" 
     BACKEND_DIST="iptables-viz-backend-$ARCH-$TAG.tar.gz"
@@ -206,7 +206,7 @@ download_backend() {
 
 # downloads the frontend binary and copies it to the frontend installation directory
 download_frontend() {
-    echo "downloading frontend...."
+    echo "Downloading frontend"
     FRONTEND_BINARY_NAME="iptables-viz-frontend"
     TAG="master"
     FRONTEND_DIST="iptables-viz-frontend-$ARCH-$TAG.tar.gz"
@@ -232,7 +232,7 @@ download_frontend() {
 create_systemd_file_main() {
     echo "creating main systemd file"
     run_as_root printf "[Unit]
-Description=iptables-viz
+Description=Oneshot service for iptables-viz
 
 [Service]
 # The dummy program will exit
@@ -253,7 +253,7 @@ create_systemd_file_backend() {
     echo "creating backend systemd file"
     run_as_root printf "[Unit]
 Description=Iptables Visualization Go Service
-ConditionPathExists="$BACKEND_INSTALL_DIR/$BACKEND_SERVICE_NAME"
+ConditionPathExists=$BACKEND_INSTALL_DIR/$BACKEND_SERVICE_NAME
 PartOf=iptables-viz.service
 After=iptables-viz.service
 
@@ -261,12 +261,12 @@ After=iptables-viz.service
 Type=simple
 User=root
 Group=root
-ExecStart="$BACKEND_INSTALL_DIR/$BACKEND_SERVICE_NAME" --platform linux
+ExecStart=$BACKEND_INSTALL_DIR/$BACKEND_SERVICE_NAME --platform linux
 Restart=on-failure
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier="$BACKEND_SERVICE_NAME"
+SyslogIdentifier=$BACKEND_SERVICE_NAME
 
 [Install]
 WantedBy=iptables-viz.service
@@ -278,21 +278,21 @@ create_systemd_file_frontend() {
     echo "creating frontend systemd file"
     run_as_root printf "[Unit]
 Description=Iptables Visualization Frontend App
-ConditionPathExists="$FRONTEND_INSTALL_DIR/$FRONTEND_SERVICE_NAME"
+ConditionPathExists=$FRONTEND_INSTALL_DIR/$FRONTEND_SERVICE_NAME
 PartOf=iptables-viz.service
-After="$BACKEND_SERVICE_NAME.service"
+After=$BACKEND_SERVICE_NAME.service
 After=iptables-viz.service
 
 [Service]
 Type=simple
 User=root
 Group=root
-ExecStart=/usr/local/bin/serve -s "$FRONTEND_INSTALL_DIR/$FRONTEND_SERVICE_NAME"
+ExecStart=/usr/local/bin/serve -s $FRONTEND_INSTALL_DIR/$FRONTEND_SERVICE_NAME
 Restart=on-failure
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier="$FRONTEND_SERVICE_NAME"
+SyslogIdentifier=$FRONTEND_SERVICE_NAME
 
 [Install]
 WantedBy=iptables-viz.service
