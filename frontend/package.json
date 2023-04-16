@@ -1,0 +1,33 @@
+{
+  "name": "iptables-viz-vite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^2.5.5",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@types/cytoscape-popper": "^2.0.0",
+    "@types/react-cytoscapejs": "^1.2.2",
+    "cytoscape-dagre": "^2.5.0",
+    "cytoscape-popper": "^2.0.0",
+    "framer-motion": "^10.10.0",
+    "react": "^18.2.0",
+    "react-cytoscapejs": "^2.0.0",
+    "react-dom": "^18.2.0",
+    "tippy.js": "^6.3.7"
+  },
+  "devDependencies": {
+    "@types/cytoscape-dagre": "^2.3.0",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^3.1.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.2.0"
+  }
+}
