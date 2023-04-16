@@ -32,7 +32,6 @@ func buildConfigFromFlags(masterURL, kubeConfigPath string) (*rest.Config, error
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: masterURL}}).ClientConfig()
 }
 
-
 // fetches the kubeconfig
 func getKubeConfig() (*rest.Config, error) {
 	config, err := buildConfigFromFlags("", KubeConfigFilePath)
