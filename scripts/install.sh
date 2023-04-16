@@ -218,18 +218,10 @@ WantedBy=iptables-viz.service
 }
 
 # starts the systemd service
-run_systemd_file() {
+start_systemd_services() {
   run_as_root systemctl daemon-reload
-  if ! check_if_main_systemd_is_enabled || ! check_if_backend_systemd_is_enabled || ! check_if_frontend_systemd_is_enabled; then
-    run_as_root systemctl enable iptables-viz "$BACKEND_SERVICE_NAME" "$FRONTEND_SERVICE_NAME"
-  else
-    echo "iptables viz service is already enabled"
-  fi
-  if ! check_if_main_systemd_is_running; then
-    run_as_root systemctl start iptables-viz
-  else
-    echo "iptables viz service is already active"
-  fi
+  run_as_root systemctl enable iptables-viz "$BACKEND_SERVICE_NAME" "$FRONTEND_SERVICE_NAME"
+  run_as_root systemctl start iptables-viz
 }
 
 # cleans up the tmp directory where the binaries were downloaded temporarily
@@ -250,5 +242,5 @@ download_frontend
 create_systemd_file_main
 create_systemd_file_backend
 create_systemd_file_frontend
-run_systemd_file
+start_systemd_services
 cleanup
