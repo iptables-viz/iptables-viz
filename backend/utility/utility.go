@@ -18,6 +18,7 @@ import (
 
 var KubeConfigFilePath string
 
+// checks if kubeConfigPath is given or not, if not uses the inCluster config
 func buildConfigFromFlags(masterURL, kubeConfigPath string) (*rest.Config, error) {
 	if kubeConfigPath == "" && masterURL == "" {
 		kubeconfig, err := rest.InClusterConfig()
@@ -31,12 +32,14 @@ func buildConfigFromFlags(masterURL, kubeConfigPath string) (*rest.Config, error
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: masterURL}}).ClientConfig()
 }
 
+
+// fetches the kubeconfig
 func getKubeConfig() (*rest.Config, error) {
-	// It uses in-cluster config, if kubeconfig path is not specified
 	config, err := buildConfigFromFlags("", KubeConfigFilePath)
 	return config, err
 }
 
+// create a new k8s REST client
 func ClientSetup() *kubernetes.Clientset {
 	// Create a Kubernetes REST config
 	config, err := getKubeConfig()
@@ -53,6 +56,7 @@ func ClientSetup() *kubernetes.Clientset {
 	return client
 }
 
+// runs the siptables command inside the kube-proxy pod
 func RunPodShellCommand(podName, tableName string) (string, error) {
 	cmd := exec.Command("sh", "-c", fmt.Sprintf("kubectl exec -n kube-system %s -- sh -c \"iptables -w -L -t %s\" | jc --iptables --quiet", podName, tableName))
 	out, err := cmd.CombinedOutput()
@@ -67,6 +71,7 @@ func RunPodShellCommand(podName, tableName string) (string, error) {
 	return string(output), nil
 }
 
+// fetches the list of available kube-proxy pods
 func GetPodList(clientSet *kubernetes.Clientset) ([]string, error) {
 	var podList []string
 	pods, err := clientSet.CoreV1().Pods("kube-system").List(context.Background(), metav1.ListOptions{})

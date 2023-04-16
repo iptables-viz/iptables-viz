@@ -15,6 +15,7 @@ import (
 	"github.com/iptables-viz/iptables-viz/backend/utility"
 )
 
+// handler to fetch the iptables output from the kube-proxy pod
 func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	kubeProxyPodName := vars["pod"]
@@ -37,6 +38,7 @@ func GetKubernetesPodIptablesOutput(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handler to fetch the list of kube-proxy pods and get default iptables nat table rules
 func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	var resp models.KubernetesDefaultResponse
 	clientSet := utility.ClientSetup()
@@ -74,6 +76,7 @@ func GetKubernetesDefault(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handler for validating whether API is running or not
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	health := make(map[string]string)
@@ -87,11 +90,13 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// default handler for invalid routes
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprint(w, "Invalid Access: requested route not found")
 }
 
+// handler to fetch the iptables output for a given table for linux
 func GetLinuxIptableOutput(w http.ResponseWriter, r *http.Request) {
 	var resp models.LinuxIptableOutput
 	vars := mux.Vars(r)
