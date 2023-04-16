@@ -1,13 +1,13 @@
 #!/bin/bash
 
-: ${USE_SUDO:="true"}
-: ${BACKEND_BINARY_NAME:="iptables-viz-backend"}
-: ${BACKEND_INSTALL_DIR:="/usr/local/bin"}
-: ${BACKEND_SERVICE_NAME:="iptables-viz-backend"}
-: ${FRONTEND_BINARY_NAME:="iptables-viz-frontend"}
-: ${FRONTEND_INSTALL_DIR:="/etc/iptables-viz"}
-: ${FRONTEND_SERVICE_NAME:="iptables-viz-frontend"}
-: ${SERVICE_DIR:="/etc/systemd/system"}
+: "${USE_SUDO:="true"}"
+: "${BACKEND_BINARY_NAME:="iptables-viz-backend"}"
+: "${BACKEND_INSTALL_DIR:="/usr/local/bin"}"
+: "${BACKEND_SERVICE_NAME:="iptables-viz-backend"}"
+: "${FRONTEND_BINARY_NAME:="iptables-viz-frontend"}"
+: "${FRONTEND_INSTALL_DIR:="/etc/iptables-viz"}"
+: "${FRONTEND_SERVICE_NAME:="iptables-viz-frontend"}"
+: "${SERVICE_DIR:="/etc/systemd/system"}"
 
 HAS_CURL="$(type "curl" &> /dev/null && echo true || echo false)"
 HAS_WGET="$(type "wget" &> /dev/null && echo true || echo false)"
@@ -33,46 +33,6 @@ init_arch() {
     i686) ARCH="386" ;;
     i386) ARCH="386" ;;
     esac
-}
-
-# checks if the main systemd service is running or not
-check_if_main_systemd_is_running() {
-  if [[ "$(systemctl is-active iptables-viz)" = "active" ]]; then
-    echo "iptables-viz is already running"
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the main systemd service is enabled or not
-check_if_main_systemd_is_enabled() {
-  if [[ "$(systemctl is-enabled iptables-viz)" = "enabled" ]]; then
-    echo "iptables-viz is already enabled"
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the backend systemd service is enabled or not
-check_if_backend_systemd_is_enabled() {
-  if [[ "$(systemctl is-enabled ${BACKEND_SERVICE_NAME})" = "enabled" ]]; then
-    echo "$BACKEND_SERVICE_NAME is already enabled"
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the frontend systemd service is enabled or not
-check_if_frontend_systemd_is_enabled() {
-  if [[ "$(systemctl is-enabled ${FRONTEND_SERVICE_NAME})" = "enabled" ]]; then
-    echo "$FRONTEND_SERVICE_NAME is already enabled"
-    return 0
-  else
-    return 1
-  fi
 }
 
 # verifySupported checks that the os/arch combination is supported for
@@ -103,6 +63,31 @@ verify_supported() {
     echo "serve is required for installation"
     exit 1
   fi
+
+  if [[ -d "${FRONTEND_INSTALL_DIR}" ]]; then
+    echo "$FRONTEND_INSTALL_DIR already exists."
+    exit 1
+  fi
+  if [[ -f "${FRONTEND_INSTALL_DIR}/${FRONTEND_BINARY_NAME}" ]]; then
+    echo "$FRONTEND_BINARY_NAME already exists."
+    exit 1
+  fi
+  if [[ -f "${BACKEND_INSTALL_DIR}/${BACKEND_BINARY_NAME}" ]]; then
+    echo "$BACKEND_BINARY_NAME already exists."
+    exit 1
+  fi
+  if [[ -f "${SERVICE_DIR}/${BACKEND_SERVICE_NAME}.service" ]]; then
+    echo "$SERVICE_DIR/$BACKEND_SERVICE_NAME.service already exists."
+    exit 1
+  fi
+  if [[ -f "${SERVICE_DIR}/${FRONTEND_SERVICE_NAME}.service" ]]; then
+    echo "$SERVICE_DIR/$FRONTEND_SERVICE_NAME.service already exists."
+    exit 1
+  fi
+  if [[ -f "${SERVICE_DIR}/iptables-viz.service" ]]; then
+    echo "$SERVICE_DIR/iptables-viz.service already exists."
+    exit 1
+  fi
 }
 
 # runs the given command as root (detects if we are root already)
@@ -112,72 +97,6 @@ run_as_root() {
     else
         "${@}"
     fi
-}
-
-# create the frontend directory which will be referred by the systemd file
-create_frontend_dir() {
-  run_as_root mkdir "$FRONTEND_INSTALL_DIR"
-  echo "$FRONTEND_INSTALL_DIR directory created"
-}
-
-# checks if the main systemd unit file already exists or not
-is_main_unit_file_exists() {
-  if [[ -f "${SERVICE_DIR}/iptables-viz.service" ]]; then
-    echo "$SERVICE_DIR/iptables-viz.service already exists."
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the frontend systemd unit file already exists or not
-is_frontend_unit_file_exists() {
-  if [[ -f "${SERVICE_DIR}/${FRONTEND_SERVICE_NAME}.service" ]]; then
-    echo "$SERVICE_DIR/$FRONTEND_SERVICE_NAME.service already exists."
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the backend systemd unit file already exists or not
-is_backend_unit_file_exists() {
-  if [[ -f "${SERVICE_DIR}/${BACKEND_SERVICE_NAME}.service" ]]; then
-    echo "$SERVICE_DIR/$BACKEND_SERVICE_NAME.service already exists."
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the frontend install directory already exists or not
-check_if_frontend_install_dir_exists() {
-  if [[ -d "${FRONTEND_INSTALL_DIR}" ]]; then
-    echo "$FRONTEND_INSTALL_DIR already exists."
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the backend binary file already exists or not
-is_backend_exists() {
-  if [[ -f "${BACKEND_INSTALL_DIR}/${BACKEND_BINARY_NAME}" ]]; then
-    echo "$BACKEND_BINARY_NAME already exists."
-    return 0
-  else
-    return 1
-  fi
-}
-
-# checks if the frontend binary file already exists or not
-is_frontend_exists() {
-  if [[ -f "${FRONTEND_INSTALL_DIR}/${FRONTEND_BINARY_NAME}" ]]; then
-    echo "$FRONTEND_BINARY_NAME already exists."
-    return 0
-  else
-    return 1
-  fi
 }
 
 # downloads the backend binary and copies it to the backend installation directory
@@ -206,6 +125,8 @@ download_backend() {
 
 # downloads the frontend binary and copies it to the frontend installation directory
 download_frontend() {
+    run_as_root mkdir "$FRONTEND_INSTALL_DIR"
+    echo "$FRONTEND_INSTALL_DIR directory created"
     echo "Downloading frontend"
     FRONTEND_BINARY_NAME="iptables-viz-frontend"
     TAG="master"
@@ -319,7 +240,7 @@ cleanup() {
   if [[ -d "${BACKEND_TMP_ROOT:-}" ]]; then
     rm -rf "$BACKEND_TMP_ROOT"
   fi
-  if [[ -d "${FRONTEND_AGENT_TMP_ROOT:-}" ]]; then
+  if [[ -d "${FRONTEND_TMP_ROOT:-}" ]]; then
     rm -rf "$FRONTEND_TMP_ROOT"
   fi
 }
@@ -327,21 +248,10 @@ cleanup() {
 init_arch
 init_os
 verify_supported
-if ! is_backend_exists & ! is_frontend_exists; then
-  download_backend
-  if ! check_if_frontend_install_dir_exists; then
-    create_frontend_dir
-  fi
-  download_frontend
-  if ! is_main_unit_file_exists; then
-    create_systemd_file_main
-  fi
-  if ! is_backend_unit_file_exists; then
-    create_systemd_file_backend
-  fi
-  if ! is_frontend_unit_file_exists; then
-    create_systemd_file_frontend
-  fi
-  run_systemd_file
-fi
+download_backend
+download_frontend
+create_systemd_file_main
+create_systemd_file_backend
+create_systemd_file_frontend
+run_systemd_file
 cleanup
