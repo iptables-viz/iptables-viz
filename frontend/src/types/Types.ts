@@ -1,3 +1,6 @@
+/**
+ * Schema for storing the iptables output.
+ */
 export type IptablesSchema = {
   chain: string;
   rules: {

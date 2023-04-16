@@ -1,10 +1,24 @@
 import Cytoscape from "cytoscape";
 import { IptablesSchema } from "../types/Types";
 
+/**
+ * Trims a given string if it is longer than 10 characters.
+ *
+ * @param label - The string to be trimmed
+ *
+ * @returns The string trimmed upto 10 characters.
+ */
 const TrimString = (label: string) => {
   return label.length > 10 ? label.substring(0, 10) + "..." : label;
 };
 
+/**
+ * Parses the iptables JSON string data and extracts the list of nodes and edges for the graph.
+ *
+ * @param iptablesData - iptables JSON string data
+ *
+ * @returns The list of nodes and edges for the graph.
+ */
 export const ParseIptablesData = (
   iptablesData: string
 ): [

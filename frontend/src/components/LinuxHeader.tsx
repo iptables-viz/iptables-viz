@@ -1,5 +1,13 @@
 import { Center, Select } from "@chakra-ui/react";
 
+/**
+ * Header for selecting iptables table type.
+ *
+ * @param TableType - Type of the table selected
+ * @param SetTableType - UseState hook setter for TableType
+ *
+ * @returns The JSX Linux header component definition.
+ */
 export default function LinuxHeader(props: {
   TableType: string;
   SetTableType: React.Dispatch<React.SetStateAction<string>>;

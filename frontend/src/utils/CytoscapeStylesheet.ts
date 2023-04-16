@@ -1,4 +1,7 @@
-const cytoscapeStylesheet: cytoscape.Stylesheet[] = [
+/**
+ * The stylesheet for the Cytoscape graph component.
+ */
+export const cytoscapeStylesheet: cytoscape.Stylesheet[] = [
   {
     selector: "edge",
     css: {
@@ -40,5 +43,3 @@ const cytoscapeStylesheet: cytoscape.Stylesheet[] = [
     },
   },
 ];
-
-export { cytoscapeStylesheet };

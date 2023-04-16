@@ -1,5 +1,5 @@
 import CytoscapeComponent from "react-cytoscapejs";
-import { makeTippy } from "../utils/Tippy";
+import { makeTooltip } from "../utils/Tooltip";
 import { cytoscapeStylesheet } from "../utils/CytoscapeStylesheet";
 import Cytoscape from "cytoscape";
 import popper from "cytoscape-popper";
@@ -8,6 +8,14 @@ import dagre from "cytoscape-dagre";
 Cytoscape.use(popper);
 Cytoscape.use(dagre);
 
+/**
+ * Cytoscape graph component for rendering the iptables rules as a DAG.
+ *
+ * @param nodes - The list of nodes in the DAG
+ * @param edges - The list of edges in the DAG
+ *
+ * @returns The JSX Cytoscape graph component definition.
+ */
 export default function Graph(props: {
   nodes: Cytoscape.ElementDefinition[];
   edges: Cytoscape.ElementDefinition[];
@@ -27,10 +35,10 @@ export default function Graph(props: {
         cy.on("mouseover", "edge", (e: Cytoscape.EventObjectEdge) => {
           let edge = e.target;
           edge.on("mouseover", (_) => {
-            let tippy = makeTippy(edge, edge.data("label"));
-            tippy.show();
+            let tooltip = makeTooltip(edge, edge.data("label"));
+            tooltip.show();
             edge.on("mouseout", (_) => {
-              tippy.destroy();
+              tooltip.destroy();
             });
           });
         });
@@ -38,9 +46,9 @@ export default function Graph(props: {
         cy.on("mouseover", "node", (e: Cytoscape.EventObjectNode) => {
           let node = e.target;
 
-          let tippy = makeTippy(node, node.data("name"));
-          tippy.show();
-          setTimeout(() => tippy.destroy(), 2000);
+          let tooltip = makeTooltip(node, node.data("name"));
+          tooltip.show();
+          setTimeout(() => tooltip.destroy(), 2000);
 
           cy.elements()
             .difference(node.outgoers())
@@ -49,7 +57,7 @@ export default function Graph(props: {
           node.addClass("highlight").outgoers().addClass("highlight");
 
           node.on("mouseout", () => {
-            tippy.destroy();
+            tooltip.destroy();
 
             cy.elements().removeClass("semitransp");
             node.removeClass("highlight").outgoers().removeClass("highlight");

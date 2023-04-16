@@ -2,13 +2,18 @@ import Cytoscape from "cytoscape";
 import { Header } from "./containers/Header";
 import { Heading, Center, Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-
-import "tippy.js/dist/tippy.css";
 import { ParseIptablesData } from "./utils/Data";
 import Graph from "./components/Graph";
 import GetIptables from "./apis/API";
 import { Alert, AlertIcon } from "@chakra-ui/react";
 
+import "tippy.js/dist/tippy.css";
+
+/**
+ * Application container for executing the iptables visualization logic.
+ *
+ * @returns The JSX application container definition.
+ */
 export default function App(): JSX.Element {
   const [tableType, setTableType] = useState<string>("nat");
   const [kubeProxyPodNames, setKubeProxyPodNames] = useState<string[]>([]);
