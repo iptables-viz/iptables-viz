@@ -1,6 +1,7 @@
 # iptables-viz
+![iptables-viz](https://user-images.githubusercontent.com/43271557/232320410-2f83ee5b-7765-4a15-9b98-90a637bd26d6.png)
 
-A simple and scalable iptables visualization tool which can integrate across Kubernetes and Linux.
+A simple and scalable iptables visualization tool which can be used across Kubernetes and Linux.
 
 ## **Supported platforms**
 
