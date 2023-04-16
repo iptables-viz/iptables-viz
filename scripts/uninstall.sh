@@ -1,13 +1,13 @@
 #!/bin/bash
 
-: ${USE_SUDO:="true"}
-: ${BACKEND_BINARY_NAME:="iptables-viz-backend"}
-: ${BACKEND_INSTALL_DIR:="/usr/local/bin"}
-: ${BACKEND_SERVICE_NAME:="iptables-viz-backend"}
-: ${FRONTEND_BINARY_NAME:="iptables-viz-frontend"}
-: ${FRONTEND_INSTALL_DIR:="/etc/iptables-viz"}
-: ${FRONTEND_SERVICE_NAME:="iptables-viz-frontend"}
-: ${SERVICE_DIR:="/etc/systemd/system"}
+: "${USE_SUDO:="true"}"
+: "${BACKEND_BINARY_NAME:="iptables-viz-backend"}"
+: "${BACKEND_INSTALL_DIR:="/usr/local/bin"}"
+: "${BACKEND_SERVICE_NAME:="iptables-viz-backend"}"
+: "${FRONTEND_BINARY_NAME:="iptables-viz-frontend"}"
+: "${FRONTEND_INSTALL_DIR:="/etc/iptables-viz"}"
+: "${FRONTEND_SERVICE_NAME:="iptables-viz-frontend"}"
+: "${SERVICE_DIR:="/etc/systemd/system"}"
 
 HAS_SYSTEMD="$(type "systemctl" &> /dev/null && echo true || echo false)"
 

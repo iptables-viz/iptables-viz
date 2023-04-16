@@ -17,22 +17,22 @@ HAS_SERVE="$(type "serve" &> /dev/null && echo true || echo false)"
 
 # discovers the operating system for this system
 init_os() {
-    OS=$(uname | tr '[:upper:]' '[:lower:]')
+  OS=$(uname | tr '[:upper:]' '[:lower:]')
 }
 
 # discovers the architecture for this system
 init_arch() {
-    ARCH=$(uname -m)
-    case $ARCH in
-    armv5*) ARCH="arm" ;;
-    armv6*) ARCH="arm" ;;
-    armv7*) ARCH="arm" ;;
-    aarch64) ARCH="arm64" ;;
-    x86) ARCH="386" ;;
-    x86_64) ARCH="amd64" ;;
-    i686) ARCH="386" ;;
-    i386) ARCH="386" ;;
-    esac
+  ARCH=$(uname -m)
+  case $ARCH in
+  armv5*) ARCH="arm" ;;
+  armv6*) ARCH="arm" ;;
+  armv7*) ARCH="arm" ;;
+  aarch64) ARCH="arm64" ;;
+  x86) ARCH="386" ;;
+  x86_64) ARCH="amd64" ;;
+  i686) ARCH="386" ;;
+  i386) ARCH="386" ;;
+  esac
 }
 
 # verifySupported checks that the os/arch combination is supported for
@@ -45,22 +45,22 @@ verify_supported() {
   fi
 
   if [ "${HAS_SYSTEMD}" != "true" ]; then
-    echo "Systemd is required for installation"
+    echo "Systemd is required for installation."
     exit 1
   fi
 
   if [ "${HAS_CURL}" != "true" ] && [ "${HAS_WGET}" != "true" ]; then
-    echo "Either curl or wget is required"
+    echo "Either curl or wget is required."
     exit 1
   fi
 
   if [ "${HAS_JC}" != "true" ]; then
-    echo "jc is required for installation"
+    echo "jc is required for installation. Refer https://github.com/kellyjonbrazil/jc for the installation."
     exit 1
   fi
 
   if [ "${HAS_SERVE}" != "true" ]; then
-    echo "serve is required for installation"
+    echo "serve is required for installation. Refer https://www.npmjs.com/package/serve for the installation."
     exit 1
   fi
 
@@ -92,35 +92,35 @@ verify_supported() {
 
 # runs the given command as root (detects if we are root already)
 run_as_root() {
-    if [ $EUID -ne 0 ] && [ "$USE_SUDO" == "true" ]; then
-        sudo "${@}"
-    else
-        "${@}"
-    fi
+  if [ $EUID -ne 0 ] && [ "$USE_SUDO" == "true" ]; then
+      sudo "${@}"
+  else
+      "${@}"
+  fi
 }
 
 # downloads the backend binary and copies it to the backend installation directory
 download_backend() {
-    echo "Downloading backend"
-    BACKEND_BINARY_NAME="iptables-viz-backend"
-    TAG="master" 
-    BACKEND_DIST="iptables-viz-backend-$ARCH-$TAG.tar.gz"
-    BIN_DOWNLOAD_URL="https://firebasestorage.googleapis.com/v0/b/neelanjan-manna.appspot.com/o/demo%2F$BACKEND_DIST?alt=media&token=b7563a58-2640-4206-bda5-dbcbee0e4af1"
-    BACKEND_TMP_ROOT="$(mktemp -dt iptables-viz-backend-installer-XXXXXX)"
-    BACKEND_TMP_FILE="$BACKEND_TMP_ROOT/$BACKEND_DIST"
-    echo "Downloading $BIN_DOWNLOAD_URL"
-    if [ "${HAS_CURL}" == "true" ]; then
-        curl -SsL "$BIN_DOWNLOAD_URL" -o "$BACKEND_TMP_FILE"
-    elif [ "${HAS_WGET}" == "true" ]; then
-        wget -q -O "$BACKEND_TMP_FILE" "$BIN_DOWNLOAD_URL"
-    fi
-    BACKEND_TMP="$BACKEND_TMP_ROOT/$BACKEND_BINARY_NAME"
-    mkdir -p "$BACKEND_TMP"
-    tar xvf "$BACKEND_TMP_FILE" -C "$BACKEND_TMP"
-    BACKEND_TMP_BIN="$BACKEND_TMP/$BACKEND_BINARY_NAME"
-    echo "Preparing to install $BACKEND_BINARY_NAME into ${BACKEND_AGENT_INSTALL_DIR}"
-    run_as_root cp "$BACKEND_TMP_BIN" "$BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
-    echo "$BACKEND_BINARY_NAME installed into $BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
+  echo "Downloading backend"
+  BACKEND_BINARY_NAME="iptables-viz-backend"
+  TAG="master"
+  BACKEND_DIST="iptables-viz-backend-$ARCH-$TAG.tar.gz"
+  BIN_DOWNLOAD_URL="https://firebasestorage.googleapis.com/v0/b/neelanjan-manna.appspot.com/o/demo%2F$BACKEND_DIST?alt=media&token=b7563a58-2640-4206-bda5-dbcbee0e4af1"
+  BACKEND_TMP_ROOT="$(mktemp -dt iptables-viz-backend-installer-XXXXXX)"
+  BACKEND_TMP_FILE="$BACKEND_TMP_ROOT/$BACKEND_DIST"
+  echo "Downloading $BIN_DOWNLOAD_URL"
+  if [ "${HAS_CURL}" == "true" ]; then
+      curl -SsL "$BIN_DOWNLOAD_URL" -o "$BACKEND_TMP_FILE"
+  elif [ "${HAS_WGET}" == "true" ]; then
+      wget -q -O "$BACKEND_TMP_FILE" "$BIN_DOWNLOAD_URL"
+  fi
+  BACKEND_TMP="$BACKEND_TMP_ROOT/$BACKEND_BINARY_NAME"
+  mkdir -p "$BACKEND_TMP"
+  tar xvf "$BACKEND_TMP_FILE" -C "$BACKEND_TMP"
+  BACKEND_TMP_BIN="$BACKEND_TMP/$BACKEND_BINARY_NAME"
+  echo "Preparing to install $BACKEND_BINARY_NAME into ${BACKEND_AGENT_INSTALL_DIR}"
+  run_as_root cp "$BACKEND_TMP_BIN" "$BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
+  echo "$BACKEND_BINARY_NAME installed into $BACKEND_INSTALL_DIR/$BACKEND_BINARY_NAME"
 }
 
 # downloads the frontend binary and copies it to the frontend installation directory
@@ -222,17 +222,17 @@ WantedBy=iptables-viz.service
 
 # starts the systemd service
 run_systemd_file() {
-    run_as_root systemctl daemon-reload
-    if ! check_if_main_systemd_is_enabled || ! check_if_backend_systemd_is_enabled || ! check_if_frontend_systemd_is_enabled; then
-      run_as_root systemctl enable iptables-viz "$BACKEND_SERVICE_NAME" "$FRONTEND_SERVICE_NAME"
-    else
-      echo "iptables viz service is already enabled"
-    fi
-    if ! check_if_main_systemd_is_running; then
-      run_as_root systemctl start iptables-viz
-    else
-      echo "iptables viz service is already active"
-    fi
+  run_as_root systemctl daemon-reload
+  if ! check_if_main_systemd_is_enabled || ! check_if_backend_systemd_is_enabled || ! check_if_frontend_systemd_is_enabled; then
+    run_as_root systemctl enable iptables-viz "$BACKEND_SERVICE_NAME" "$FRONTEND_SERVICE_NAME"
+  else
+    echo "iptables viz service is already enabled"
+  fi
+  if ! check_if_main_systemd_is_running; then
+    run_as_root systemctl start iptables-viz
+  else
+    echo "iptables viz service is already active"
+  fi
 }
 
 # cleans up the tmp directory where the binaries were downloaded temporarily
