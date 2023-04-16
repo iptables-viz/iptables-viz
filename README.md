@@ -18,6 +18,7 @@ A simple and scalable iptables visualization tool which can be used across Kuber
 
 - `jc` (https://github.com/kellyjonbrazil/jc)
 - `serve` (https://www.npmjs.com/package/serve)
+- `systemd` (https://systemd.io/)
 
 ## **Installation**
 
