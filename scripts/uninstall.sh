@@ -110,7 +110,7 @@ if check_if_backend_systemd_is_enabled; then
   run_as_root systemctl disable iptables-viz-backend
 fi
 if check_if_frontend_systemd_is_enabled; then 
-  run_as_root systemctl disable iptables-viz-frontend
+  run_as_root systemctl iptables-viz-frontend
 fi
 if check_if_frontend_install_dir_exists; then
   run_as_root rm -rf /etc/iptables-viz

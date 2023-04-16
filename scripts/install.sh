@@ -254,8 +254,8 @@ create_systemd_file_backend() {
     run_as_root printf "[Unit]
 Description=Iptables Visualization Go Service
 ConditionPathExists="$BACKEND_INSTALL_DIR/$BACKEND_SERVICE_NAME"
+PartOf=iptables-viz.service
 After=iptables-viz.service
-After="$BACKEND_SERVICE_NAME.service"
 
 [Service]
 Type=simple
@@ -281,6 +281,7 @@ Description=Iptables Visualization Frontend App
 ConditionPathExists="$FRONTEND_INSTALL_DIR/$FRONTEND_SERVICE_NAME"
 PartOf=iptables-viz.service
 After="$BACKEND_SERVICE_NAME.service"
+After=iptables-viz.service
 
 [Service]
 Type=simple
