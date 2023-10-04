@@ -1,0 +1,54 @@
+name: Build and Push Docker images
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - './manifests/*.*'
+    # branches: ["main"]
+    # paths: ["backend/**", "frontend/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["backend/**", "frontend/**"]
+
+env:
+  GO_VERSION: 1.17
+
+jobs:
+  lint:
+    name: Code analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: azohra/shell-linter@latest
+        with:
+          path: "scripts/*.sh"
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: gofmt check
+        run: |
+          cd backend
+          if [ "$(gofmt -s -l . | wc -l)" -ne 0 ]; then
+            echo "The following files were found to be not go formatted:"
+            gofmt -s -l .
+            exit 1
+          fi
+
+  build:
+    needs: [ lint ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+
