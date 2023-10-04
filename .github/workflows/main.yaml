@@ -2,9 +2,6 @@ name: Build and Push Docker images
 
 on:
   push:
-    paths-ignore:
-      - '**.md'
-      - './manifests/*.*'
     branches:
       - 'main'
     paths:
