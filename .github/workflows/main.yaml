@@ -19,10 +19,10 @@ jobs:
     name: Code analysis
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
 
-      - name: Run ShellCheck
+      - name: run shell check
         uses: azohra/shell-linter@latest
         with:
           path: "scripts/*.sh"
@@ -39,9 +39,21 @@ jobs:
             gofmt -s -l .
             exit 1
           fi
+      - name: unused-package check
+        run: |
+          cd backend
+          make unused-package-check
+
+      - name: golang lint
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          workdir: backend/
 
   build:
     needs: [ lint ]
+
+
+    name: Build and Push docker images
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,4 +63,19 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/iptables-viz-backend:latest
