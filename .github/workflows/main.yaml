@@ -5,14 +5,17 @@ on:
     paths-ignore:
       - '**.md'
       - './manifests/*.*'
-    # branches: ["main"]
-    # paths: ["backend/**", "frontend/**"]
+    branches:
+      - 'main'
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
   pull_request:
-    branches: ["main"]
-    paths: ["backend/**", "frontend/**"]
-
-env:
-  GO_VERSION: 1.17
+    branches:
+      - 'main'
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
 
 jobs:
   lint:
@@ -29,7 +32,7 @@ jobs:
 
       - uses: actions/setup-go@v4
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: 1.17
 
       - name: gofmt check
         run: |
@@ -49,7 +52,6 @@ jobs:
         uses: reviewdog/action-golangci-lint@v2
         with:
           workdir: backend/
-
 
   build-backend:
     needs: [ lint ]
@@ -91,7 +93,6 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
 
   build-frontend:
     needs: [ lint ]
