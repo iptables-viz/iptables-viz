@@ -37,10 +37,10 @@ fi
 if [[ "$(systemctl is-enabled iptables-viz)" = "enabled" ]]; then
   run_as_root systemctl disable iptables-viz
 fi
-if [[ "$(systemctl is-enabled ${BACKEND_SERVICE_NAME}.service)" = "enabled" ]]; then
+if [[ "$(systemctl is-enabled "${BACKEND_SERVICE_NAME}".service)" = "enabled" ]]; then
   run_as_root systemctl disable iptables-viz-backend
 fi
-if [[ "$(systemctl is-enabled ${FRONTEND_SERVICE_NAME}.service)" = "enabled" ]]; then
+if [[ "$(systemctl is-enabled "${FRONTEND_SERVICE_NAME}".service)" = "enabled" ]]; then
   run_as_root systemctl disable iptables-viz-frontend
 fi
 if [[ -d "${FRONTEND_INSTALL_DIR}" ]]; then

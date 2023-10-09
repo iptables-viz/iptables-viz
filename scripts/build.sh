@@ -15,25 +15,27 @@ platforms=(
  "linux/arm64"
 )
 
-rm -rf platforms-$TAG/*
+rm -rf "platforms-$TAG/*"
 for platform in "${platforms[@]}"
 do
-    platform_split=(${platform//\// })
+    platform_split=("${platform//\// }")
     GOOS=${platform_split[0]}
     GOARCH=${platform_split[1]}
-    echo 'Building' $GOARCH
-    OUTPUT_NAME='iptables-viz-backend-'$GOARCH-$TAG
+    echo 'Building' "$GOARCH"
+    OUTPUT_NAME="iptables-viz-backend-$GOARCH-$TAG"
 
-    env GOOS=$GOOS GOARCH=$GOARCH VERSION=$TAG go build -ldflags "-X main.Version=$TAG" -v -o platforms-$TAG/$OUTPUT_NAME $PACKAGE
+    env GOOS="$GOOS" GOARCH="$GOARCH" VERSION="$TAG" go build -ldflags "-X main.Version=$TAG" -v -o "platforms-$TAG/$OUTPUT_NAME" "$PACKAGE"
 
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
+        # shellcheck disable=SC2319
         echo "An error has occurred with exit code $?! Aborting the script execution..."
         exit 1
     fi
 
-    cd platforms-$TAG || exit
-    mv $OUTPUT_NAME iptables-viz-backend
-    tar -czvf $OUTPUT_NAME.tar.gz iptables-viz-backend
+    cd "platforms-$TAG" || exit
+    mv "$OUTPUT_NAME" iptables-viz-backend
+    tar -czvf "$OUTPUT_NAME.tar.gz" iptables-viz-backend
     rm -rf iptables-viz-backend
     cd ..
 done

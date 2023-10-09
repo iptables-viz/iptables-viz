@@ -1,0 +1,92 @@
+name: Build and Push Docker backend images
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'backend/**'
+      - 'scripts/**'
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'backend/**'
+      - 'scripts/**'
+
+jobs:
+  lint:
+    name: Code analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: run shell check
+        uses: azohra/shell-linter@latest
+        with:
+          path: "scripts/*.sh"
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.17
+
+      - name: gofmt check
+        run: |
+          cd backend
+          if [ "$(gofmt -s -l . | wc -l)" -ne 0 ]; then
+            echo "The following files were found to be not go formatted:"
+            gofmt -s -l .
+            exit 1
+          fi
+
+      - name: unused-package check
+        run: |
+          cd backend
+          make unused-package-check
+
+      - name: golang lint
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          workdir: backend/
+
+  build:
+    needs: [ lint ]
+
+    name: Backend build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-backend-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-backend-
+
+      - name: Build backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main') }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/iptables-viz-backend:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
