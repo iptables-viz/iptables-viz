@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "frontend.fullname" . }}
+  labels:
+    app: iptables-viz-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iptables-viz-frontend
+  template:
+    metadata:
+      labels:
+        app: iptables-viz-frontend
+    spec:
+      containers:
+        - name: iptables-viz-frontend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+      
