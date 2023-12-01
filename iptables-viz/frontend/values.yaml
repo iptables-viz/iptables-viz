@@ -1,0 +1,18 @@
+image:
+  repository: iptablesviz/iptables-viz-frontend
+  tag: v1
+  pullPolicy: Always
+
+service:
+  name: iptables-viz-frontend-svc
+  type: NodePort
+  port: 80
+  nodePort: 30025
+
+ingress:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name: iptables-viz-frontend-sa
+  annotations: {}

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: iptables-viz-backend
+description: A Helm chart for the iptables-viz backend
+version: 0.1.0

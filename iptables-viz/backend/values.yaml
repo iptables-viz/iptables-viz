@@ -1,0 +1,23 @@
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+image:
+  repository: iptablesviz/iptables-viz-backend
+  tag: v1
+  pullPolicy: Always
+
+service:
+  name: iptables-viz-backend-svc
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name: iptables-viz-backend-sa
+  annotations: {}
